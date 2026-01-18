@@ -14,6 +14,7 @@ export class PrismaService
 
   async onModuleInit() {
     await this.$connect();
+    console.log('✅ Prisma connected to Postgres');
   }
 
   async onModuleDestroy() {
