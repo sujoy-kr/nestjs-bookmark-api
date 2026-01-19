@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 // import { User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthDto } from './dto';
 import bcrypt from 'bcryptjs';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
 
 @Injectable()
 export class AuthService {
@@ -12,16 +13,25 @@ export class AuthService {
     const salt = await bcrypt.genSalt(saltRounds);
     const hash = await bcrypt.hash(dto.password, salt);
 
-    const user = await this.prismaService.user.create({
-      data: {
-        email: dto.email,
-        hash,
-      },
-    });
+    try {
+      const user = await this.prismaService.user.create({
+        data: {
+          email: dto.email,
+          hash,
+        },
+      });
 
-    return user;
+      return user;
+    } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new ForbiddenException('Email already exists');
+        }
+      }
+      throw error;
+    }
   }
-  signin() {
+  signin(dto: AuthDto) {
     return 'This is signin';
   }
 }
