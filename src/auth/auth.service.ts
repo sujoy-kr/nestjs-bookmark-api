@@ -4,10 +4,16 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthDto } from './dto';
 import bcrypt from 'bcryptjs';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private jwt: JwtService,
+    private config: ConfigService,
+  ) {}
   async signup(dto: AuthDto) {
     const saltRounds = +(process.env.BCRYPT_SALT_ROUND || 10);
     const salt = await bcrypt.genSalt(saltRounds);
@@ -48,6 +54,22 @@ export class AuthService {
       throw new ForbiddenException('Incorrect credentials');
     }
 
-    return user;
+    return await this.signToken(user.id, user.email);
+  }
+
+  async signToken(userId: number, email: string): Promise<{ token: string }> {
+    const payload = {
+      sub: userId,
+      email,
+    };
+
+    const secret = this.config.get<string>('JWT_SECRET');
+
+    const token = await this.jwt.signAsync(payload, {
+      expiresIn: '1w',
+      secret,
+    });
+
+    return { token };
   }
 }
