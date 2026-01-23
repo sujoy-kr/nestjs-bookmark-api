@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto';
 import { ApiBody } from '@nestjs/swagger';
@@ -16,6 +16,6 @@ export class AuthController {
   @Post('signin')
   @ApiBody({ type: AuthDto })
   signin(@Body() dto: AuthDto) {
-    return this.authService.signin();
+    return this.authService.signin(dto);
   }
 }

@@ -31,7 +31,23 @@ export class AuthService {
       throw error;
     }
   }
-  signin(dto: AuthDto) {
-    return 'This is signin';
+  async signin(dto: AuthDto) {
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        email: dto.email,
+      },
+    });
+
+    if (!user) {
+      throw new ForbiddenException('Incorrect credentials');
+    }
+
+    const passMatch = await bcrypt.compare(dto.password, user.hash);
+
+    if (!passMatch) {
+      throw new ForbiddenException('Incorrect credentials');
+    }
+
+    return user;
   }
 }
