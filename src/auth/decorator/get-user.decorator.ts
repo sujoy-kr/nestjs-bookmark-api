@@ -1,10 +1,23 @@
-import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import {
+  createParamDecorator,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Request } from 'express';
-import { JwtPayload } from '../interface/jwt-payload.interface';
+import type { User } from '@prisma/client';
 
 export const GetUser = createParamDecorator(
-  (_: unknown, ctx: ExecutionContext): JwtPayload => {
+  (data: string | undefined, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest<Request>();
-    return request.user as JwtPayload;
+    const user = request.user as User;
+
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+
+    if (data) {
+      return user[data as keyof User];
+    }
+    return user;
   },
 );
