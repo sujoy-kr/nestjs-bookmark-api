@@ -18,6 +18,15 @@ async function bootstrap() {
     .setTitle('Bookmark API')
     .setDescription('API documentation')
     .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        in: 'header',
+      },
+      'jwt',
+    )
     .build();
 
   // This scans all modules, controllers, and decorated routes
