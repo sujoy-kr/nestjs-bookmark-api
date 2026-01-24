@@ -4,7 +4,8 @@ import type { User } from '@prisma/client';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtGuard } from 'src/auth/guard';
 import { GetUser } from 'src/auth/decorator';
-import { EditUserDto } from './dto/edit-user.dto';
+import { EditUserDto, GetUserDto } from './dto';
+import { plainToInstance } from 'class-transformer';
 @ApiTags('Users')
 @Controller('user')
 export class UserController {
@@ -14,7 +15,7 @@ export class UserController {
   @UseGuards(JwtGuard)
   @Get('me')
   getMe(@GetUser() user: User) {
-    return user;
+    return plainToInstance(GetUserDto, user);
   }
 
   @ApiBearerAuth('jwt')

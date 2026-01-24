@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { EditUserDto } from './dto/edit-user.dto';
+import { plainToInstance } from 'class-transformer';
+import { GetUserDto } from './dto';
 
 @Injectable()
 export class UserService {
@@ -16,6 +18,6 @@ export class UserService {
       },
     });
 
-    return user;
+    return plainToInstance(GetUserDto, user);
   }
 }
